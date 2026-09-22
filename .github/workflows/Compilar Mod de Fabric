@@ -1,5 +1,3 @@
-name: Compilar Mod de Fabric
-
 on:
   push:
     branches: [ "main", "master" ]
