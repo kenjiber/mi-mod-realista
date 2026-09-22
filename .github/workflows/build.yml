@@ -16,7 +16,7 @@ jobs:
         run: |
           echo "=== Archivos iniciales en el repositorio ==="
           ls -la
-          
+
           ZIP_FILE=$(find . -maxdepth 2 -iname "*.zip" | head -n 1)
           if [ -n "$ZIP_FILE" ]; then
             echo "Descomprimiendo: $ZIP_FILE"
@@ -38,17 +38,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Permisos de ejecucion
-        run: |
-          if [ -f "gradlew" ]; then
-            chmod +x gradlew
-          else
-            echo "ERROR: El archivo gradlew no existe dentro del .zip o repositorio."
-            exit 1
-          fi
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
 
       - name: Compilar con Gradle
-        run: ./gradlew build --stacktrace
+        run: gradle build --stacktrace
 
       - name: Guardar archivo JAR
         uses: actions/upload-artifact@v4
