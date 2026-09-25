@@ -1,4 +1,4 @@
-name: Compilar Mod Fabric 1.21.1
+name: Compilar Mod Fabric 1.21.11
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo
+      - name: Descargar código
         uses: actions/checkout@v4
 
       - name: Descomprimir y preparar archivos
@@ -25,26 +25,36 @@ jobs:
 
           GRADLE_DIR=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
           if [ -n "$GRADLE_DIR" ] && [ "$GRADLE_DIR" != "." ]; then
-            echo "Moviendo archivos desde $GRADLE_DIR a la raiz..."
+            echo "Moviendo archivos desde $GRADLE_DIR a la raíz..."
             cp -rn "$GRADLE_DIR"/* .
           fi
 
-          echo "=== Archivos en la raiz tras mover ==="
+          echo "=== Archivos en la raíz tras mover ==="
           ls -la
 
+          # Dar permisos de ejecución al wrapper
+          chmod +x gradlew || true
+
       - name: Configurar Java 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Instalar Gradle
+      - name: Configurar Gradle 8.12
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.8'
+          gradle-version: '8.12'
 
       - name: Compilar con Gradle
-        run: gradle build --stacktrace
+        run: |
+          if [ -f "./gradlew" ]; then
+            echo "Usando Gradle wrapper del proyecto"
+            ./gradlew build --stacktrace
+          else
+            echo "Wrapper no encontrado, usando Gradle del sistema"
+            gradle build --stacktrace
+          fi
 
       - name: Guardar archivo JAR
         uses: actions/upload-artifact@v4
